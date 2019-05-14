@@ -6,6 +6,8 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <bits/stdc++.h>
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
 
@@ -16,7 +18,9 @@ vector<string> lista_categorias                         { "Acao", "Animacoes", "
                                                           "Terror", "Musica", "Sci Fi",
                                                           "TV", "Thrillers", "Epicos",
                                                           "Minisseries", "Obras de Epoca", "Westerns"};
+
 vector<string> lista_subcategorias                      { "anime", "regioes", "romances" };
+
 string epicos =                                         "52858";
 string minisserie =                                     "4814";
 string obras_de_epoca =                                 "12123";
@@ -346,32 +350,6 @@ void create_link(string codigo){
     cout << "\n";
 }
 
-bool check_input(string in){
-    if(in.length() > 2){
-        return false;
-    } else {
-        bool is_valid = true;
-        if (in != "\n"){
-            for (int i = 0; i < in.length(); i++){
-                if (isdigit(in[i]) == false){
-                    is_valid = false;
-                }
-            }
-        }
-        return is_valid;
-    }
-}
-
-bool check_key(string key, vector<string> keys){
-    bool check_result = false;
-    for (int i = 0; i < keys.size(); i++){
-        if (boost::iequals(key, keys[i])){
-            check_result = true;
-        }
-    }
-    return check_result;
-}
-
 vector<string> list_keys(map <string,string> m){
     vector <string> key_list;
     int count = 1;
@@ -381,13 +359,16 @@ vector<string> list_keys(map <string,string> m){
     return key_list;
 }
 
-void show_subcategories(int index, string name){
+void show_subcategories(int index){
+    srand(time(0));
     map <string,string> :: iterator it;
     map <string, string> subc;
     string code;
-    int codex = index;
-    if (codex == -1 ){
-        int codex = rand() % 18;
+    int codex;
+    if (index == -1){
+        codex = rand() % 18;
+    } else {
+        codex = index;
     }
     switch(codex){
         case 0:
@@ -454,42 +435,45 @@ void show_subcategories(int index, string name){
             subc = l_f_romanticos;
             break;
     }
-    vector<string> list_subc_keys;
-    string choice;
-    list_subc_keys = list_keys(subc);
+    vector<string> list_subc_keys = list_keys(subc);
+    int choice;
+    string aux;
     if (index != -1){
         cout << "==================================" << endl;
-        cout << "     " << name << endl;
-        cout << "==================================" << endl;
+
         for (int j = 0; j < list_subc_keys.size(); j++){
             cout << j + 1 << ") " << list_subc_keys[j] << endl;
         }
-        cout << "=  Digite o nome da subcategoria =" << endl;
-        cout << "=  que deseja dentre as listadas =" << endl;
+
+        cout << "=  Digite o número da subcategoria =" << endl;
+        cout << "=   que deseja dentre as listadas  =" << endl;
         cout << "> ";
-        getline(cin, choice);
         cout << "==================================" << endl;
+        getline(cin, aux);
+        choice = stoi(aux);
+        choice--;
+
     } else {
-        choice = list_subc_keys[rand() % (list_subc_keys.size() - 1)];
+
+        choice =  rand() % list_subc_keys.size() - 1;
     }
-    if (check_key(choice, list_subc_keys)){
-         it = subc.find(choice);
+
+    if (choice <= list_subc_keys.size() - 1){
+         it = subc.find(list_subc_keys[choice]);
          code = it->second;
-         if (!check_input(choice)){
-             if(choice == "anime"){
-                     show_subcategories(18, "Anime");
-             } else if(choice == "regioes"){
-                     show_subcategories(19, "Filmes Estrangeiros");
-             } else if (choice == "romances"){
-                     show_subcategories(20, "Filmes Romanticos");
-             }
+         if(code == "anime"){
+             show_subcategories(18);
+         } else if (code == "regioes"){
+             show_subcategories(19);
+         } else if (code == "romances"){
+             show_subcategories(20);
          }
-        create_link(code);
+         create_link(code);
     }
 }
 
 void show_categories(){
-    int choosed = -1;
+    int choosed;
     string aux;
     cout << "===         Categories         ===" << endl;
     for (int i = 0; i < lista_categorias.size(); i++){
@@ -498,25 +482,15 @@ void show_categories(){
     cout << "Digite o numero referente a " << endl;
     cout << "categoria que deseja" << endl;
     cout << "Para uma escolha aleatoria, " << endl;
-    cout << "pressione enter." << endl;
+    cout << "digite -1." << endl;
     cout << "> ";
     getline(cin, aux);
+    choosed = stoi(aux);
+    if(choosed != -1){ choosed--; }
     cout << "==================================" << endl;
     cout << "\n";
-    if (aux == "\n"){
-        show_subcategories(choosed, "Escolha Aleatoria");
-    }
-    else if (check_input(aux)){
-        int ind = stoi(aux);
-        if (!(ind - 1 < 0 || ind > lista_categorias.size())){
-            choosed = ind - 1;
-        } else {
-            choosed = -2;
-        }
-    }
-    if ((choosed >= -1) && (choosed < lista_categorias.size())){
-        show_subcategories(choosed, lista_categorias[choosed]);
-    }
+
+    show_subcategories(choosed);
 
 }
 
